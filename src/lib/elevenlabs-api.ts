@@ -126,7 +126,7 @@ function getVoiceIdForAccent(accent: Accent): string {
   // These are real Eleven Labs voice IDs for premium voices
   const voiceMap: Record<string, string> = {
     'british': '21m00Tcm4TlvDq8ikWAM', // Rachel
-    'american': 'ErXwobaYiN019PkySvjV', // Antoni
+    'american': 'ecp3DWciuUyW7BYM7II1', // Antoni
     'australian': 'IKne3meq5aSn9XLyUdCD', // Josh 
     'indian': 'ecp3DWciuUyW7BYM7II1', // Anika
     'french': 'jsCqWAovK2LkecY7zXl4', // Nicole
@@ -141,10 +141,13 @@ function getVoiceIdForAccent(accent: Accent): string {
   const accentId = accent.id.toLowerCase();
   const voiceId = voiceMap[accentId] || voiceMap['default'];
   
-  console.log('Voice mapping debug:');
+  // More aggressive console logging to debug the issue
+  console.log('-----------------------------------');
+  console.log('VOICE MAPPING DEBUG - UPDATED VALUES');
   console.log(`- Requested accent: ${accentId}`);
   console.log(`- Selected voice ID: ${voiceId}`);
-  console.log('- Available voice mappings:', voiceMap);
+  console.log(`- Voice map contents: `, JSON.stringify(voiceMap, null, 2));
+  console.log('-----------------------------------');
   
   return voiceId;
 }

@@ -8,6 +8,7 @@ import { BlindTestToggle } from "./blindtest/BlindTestToggle";
 import { BlindTest } from "./blindtest/BlindTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformVoice } from "@/lib/elevenlabs-api";
+import { checkNeedsReload, markForReload } from "@/lib/force-reload";
 
 export type Accent = {
   id: string;
@@ -29,6 +30,27 @@ export default function VoiceFairApp() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBlindTestMode, setIsBlindTestMode] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
+
+  // Check if we need to force reload on component mount
+  useEffect(() => {
+    checkNeedsReload();
+    
+    // Clear any cached data in localStorage
+    if (typeof window !== 'undefined') {
+      // Add a version number to track when we need to clear cache
+      const currentVersion = '1.0.1'; // Bump this when making significant changes
+      const storedVersion = localStorage.getItem('app_version');
+      
+      if (storedVersion !== currentVersion) {
+        console.log(`Version change detected: ${storedVersion} -> ${currentVersion}`);
+        console.log('Clearing cache and updating version...');
+        localStorage.setItem('app_version', currentVersion);
+        // Force a reload to ensure all cache is cleared
+        markForReload();
+        window.location.reload();
+      }
+    }
+  }, []);
 
   const handleAudioUpload = (audio: AudioFile) => {
     // Reset any previous state
