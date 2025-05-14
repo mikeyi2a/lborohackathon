@@ -12,7 +12,7 @@ import { Download } from "lucide-react";
 import { Accent, AudioFile } from "../VoiceFairApp";
 
 interface AudioComparisonProps {
-  originalAudio: AudioFile;
+  originalAudio: AudioFile | null;
   transformedAudio: AudioFile;
   accent: Accent | null;
 }
@@ -22,6 +22,11 @@ export function AudioComparison({
   transformedAudio,
   accent 
 }: AudioComparisonProps) {
+  
+  // Early return if originalAudio is null (should not happen in practice)
+  if (!originalAudio) {
+    return null;
+  }
   
   const downloadAudio = (audio: AudioFile) => {
     const link = document.createElement('a');

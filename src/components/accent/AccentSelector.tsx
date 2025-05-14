@@ -22,8 +22,8 @@ interface AccentSelectorProps {
 
 const AVAILABLE_ACCENTS: Accent[] = [
   {
-    id: "standard-british",
-    name: "Standard British",
+    id: "british",
+    name: "British",
     description: "Received Pronunciation (RP) accent from Southern England"
   },
   {
@@ -32,19 +32,44 @@ const AVAILABLE_ACCENTS: Accent[] = [
     description: "General American accent commonly heard in media"
   },
   {
-    id: "indian-english",
-    name: "Indian English",
+    id: "indian",
+    name: "Indian",
     description: "Indian English accent with characteristic intonation patterns"
   },
   {
     id: "australian",
     name: "Australian",
-    description: "General Australian English accent"
+    description: "Australian English accent with distinctive vowels"
   },
   {
-    id: "canadian",
-    name: "Canadian",
-    description: "Canadian English accent with some American influences"
+    id: "french",
+    name: "French Accent",
+    description: "English spoken with a French accent"
+  },
+  {
+    id: "spanish",
+    name: "Spanish Accent",
+    description: "English spoken with a Spanish accent"
+  },
+  {
+    id: "german",
+    name: "German Accent",
+    description: "English spoken with a German accent"
+  },
+  {
+    id: "japanese",
+    name: "Japanese Accent",
+    description: "English spoken with a Japanese accent"
+  },
+  {
+    id: "polish",
+    name: "Polish Accent",
+    description: "English spoken with a Polish accent"
+  },
+  {
+    id: "irish",
+    name: "Irish",
+    description: "Irish English accent with distinctive intonation"
   }
 ];
 

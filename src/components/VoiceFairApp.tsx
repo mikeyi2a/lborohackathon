@@ -7,6 +7,10 @@ import { AppIntro } from "./AppIntro";
 import { BlindTestToggle } from "./blindtest/BlindTestToggle";
 import { BlindTest } from "./blindtest/BlindTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { transformVoice } from "@/lib/elevenlabs-api";
+import { Button } from "@/components/ui/button";
+import { SettingsIcon } from "lucide-react";
+import { SettingsPage } from "./settings/SettingsPage";
 
 export type Accent = {
   id: string;
@@ -28,6 +32,7 @@ export default function VoiceFairApp() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBlindTestMode, setIsBlindTestMode] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
   const handleAudioUpload = (audio: AudioFile) => {
     // Reset any previous state
@@ -43,28 +48,75 @@ export default function VoiceFairApp() {
     setProcessingError(null);
 
     try {
-      // Simulate API call with timeout
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      // Check if we have audio data first
+      if (!originalAudio.url) {
+        throw new Error("Audio file is invalid or not properly loaded.");
+      }
 
-      // Mock transformed audio result
-      // In a real app, this would be the result from the API
-      setTransformedAudio({
-        url: originalAudio.url, // In real app, this would be a different URL
-        name: `${originalAudio.name.split('.')[0]}_${selectedAccent.id}.${originalAudio.name.split('.')[1]}`,
-        type: originalAudio.type,
-        size: originalAudio.size,
-      });
+      // Check file size
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+      if (originalAudio.size > MAX_FILE_SIZE) {
+        throw new Error("Audio file is too large. Maximum size is 10MB.");
+      }
+
+      // Use the Eleven Labs API to transform the voice
+      const result = await transformVoice(originalAudio, selectedAccent);
+      
+      if (!result) {
+        throw new Error("Voice transformation failed. Please try again.");
+      }
+      
+      setTransformedAudio(result);
     } catch (error) {
-      setProcessingError("Failed to transform audio. Please try again.");
       console.error("Transformation error:", error);
+      
+      // Handle specific API key errors
+      if (error instanceof Error && error.message.includes('API key not found')) {
+        setProcessingError('ElevenLabs API key not found. Please add your API key in the settings.');
+      } 
+      // Handle rate limiting or subscription issues
+      else if (error instanceof Error && error.message.includes('402')) {
+        setProcessingError('API subscription limit reached. Please check your ElevenLabs account.');
+      }
+      // Handle authentication errors
+      else if (error instanceof Error && error.message.includes('401')) {
+        setProcessingError('Invalid API key. Please check your ElevenLabs API key in settings.');
+      }
+      // Handle other errors
+      else {
+        setProcessingError(
+          error instanceof Error 
+            ? error.message 
+            : "Failed to transform audio. Please try again."
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const goToSettings = () => {
+    setShowSettings(true);
+  };
+
+  if (showSettings) {
+    return <SettingsPage onBack={() => setShowSettings(false)} />;
+  }
+
   return (
     <div className="container py-8 md:py-12">
-      <AppIntro />
+      <div className="flex justify-between items-center mb-6">
+        <AppIntro />
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={goToSettings}
+          className="ml-4"
+        >
+          <SettingsIcon className="h-4 w-4 mr-2" />
+          Settings
+        </Button>
+      </div>
       
       <div className="mt-8 space-y-8">
         <Tabs defaultValue="transform" className="w-full">
@@ -88,6 +140,7 @@ export default function VoiceFairApp() {
                 
                 <TransformControls 
                   onTransform={handleTransform}
+                  onSettingsClick={goToSettings}
                   isProcessing={isProcessing}
                   disabled={!originalAudio || !selectedAccent || isProcessing}
                   error={processingError}
@@ -112,11 +165,11 @@ export default function VoiceFairApp() {
           </TabsContent>
           
           <TabsContent value="blind-test">
-            {transformedAudio && (
+            {transformedAudio && originalAudio && selectedAccent && (
               <BlindTest 
-                originalAudio={originalAudio!} 
+                originalAudio={originalAudio} 
                 transformedAudio={transformedAudio} 
-                accent={selectedAccent!}
+                accent={selectedAccent}
               />
             )}
           </TabsContent>
