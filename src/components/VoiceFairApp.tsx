@@ -7,7 +7,7 @@ import { AppIntro } from "./AppIntro";
 import { BlindTestToggle } from "./blindtest/BlindTestToggle";
 import { BlindTest } from "./blindtest/BlindTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { transformVoice } from "@/lib/elevenlabs-api";
+import { transformVoice, getVoiceIdForAccent } from "@/lib/elevenlabs-api";
 import { checkNeedsReload, markForReload } from "@/lib/force-reload";
 
 export type Accent = {
@@ -21,6 +21,7 @@ export type AudioFile = {
   name: string;
   type: string;
   size: number;
+  voiceId?: string; // Optional voice ID for transformed audio
 };
 
 export default function VoiceFairApp() {
@@ -38,7 +39,7 @@ export default function VoiceFairApp() {
     // Clear any cached data in localStorage
     if (typeof window !== 'undefined') {
       // Add a version number to track when we need to clear cache
-      const currentVersion = '1.0.1'; // Bump this when making significant changes
+      const currentVersion = '1.0.2'; // Bumped to force cache refresh
       const storedVersion = localStorage.getItem('app_version');
       
       if (storedVersion !== currentVersion) {
@@ -81,6 +82,9 @@ export default function VoiceFairApp() {
         throw new Error("Audio file is too large. Maximum size is 10MB.");
       }
 
+      // Get the voice ID before transformation for display
+      const voiceId = getVoiceIdForAccent(selectedAccent);
+
       // Use the Eleven Labs API to transform the voice
       const result = await transformVoice(originalAudio, selectedAccent);
       
@@ -88,7 +92,11 @@ export default function VoiceFairApp() {
         throw new Error("Voice transformation failed. Please try again.");
       }
       
-      setTransformedAudio(result);
+      // Add the voice ID to the result for display
+      setTransformedAudio({
+        ...result,
+        voiceId: voiceId, // Store the voice ID for display
+      });
     } catch (error) {
       console.error("Transformation error:", error);
       

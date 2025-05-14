@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { AudioPlayer } from "./AudioPlayer";
 import { Download } from "lucide-react";
 import { Accent, AudioFile } from "../VoiceFairApp";
+import { Badge } from "@/components/ui/badge";
 
 interface AudioComparisonProps {
   originalAudio: AudioFile | null;
@@ -72,9 +73,24 @@ export function AudioComparison({
             
             <div className="md:pl-8">
               <h3 className="font-semibold text-lg">Transformed Audio</h3>
-              <p className="text-sm text-muted-foreground">
-                {accent ? `With ${accent.name} accent` : 'Transformed version'}
-              </p>
+              <div className="flex flex-col gap-1">
+                <p className="text-sm text-muted-foreground">
+                  {accent ? `With ${accent.name} accent` : 'Transformed version'}
+                </p>
+                {transformedAudio.voiceId && (
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      Voice ID: {transformedAudio.voiceId}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {accent?.id === 'american' ? 'Antoni' : 
+                       accent?.id === 'indian' ? 'Anika' : 
+                       accent?.id === 'british' ? 'Rachel' : 
+                       accent?.id === 'australian' ? 'Josh' : ''}
+                    </Badge>
+                  </div>
+                )}
+              </div>
               
               <AudioPlayer src={transformedAudio.url} className="mt-4" />
               

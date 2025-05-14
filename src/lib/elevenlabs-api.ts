@@ -121,7 +121,7 @@ export async function transformVoice(
  * Map accent to an appropriate voice ID from Eleven Labs
  * In a real implementation, you would have a mapping of accents to voice IDs
  */
-function getVoiceIdForAccent(accent: Accent): string {
+export function getVoiceIdForAccent(accent: Accent): string {
   // Ensure we're using the latest voice mappings
   // These are real Eleven Labs voice IDs for premium voices
   const voiceMap: Record<string, string> = {

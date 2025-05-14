@@ -24,7 +24,7 @@ export function ApiKeyForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      apiKey: "sk_e78f5b4bb2a54a10092f82ae2445a3a3eba8d4c9db08df5d",
+      apiKey: "sk_48ce94b1344dbc38f6136e68a468661ea49328468cbbc88b",
     },
   });
 
@@ -36,7 +36,7 @@ export function ApiKeyForm() {
       setIsSuccess(true);
     } else {
       // If no key is saved in localStorage, use the default key and save it
-      const defaultKey = "sk_e78f5b4bb2a54a10092f82ae2445a3a3eba8d4c9db08df5d";
+      const defaultKey = "sk_48ce94b1344dbc38f6136e68a468661ea49328468cbbc88b";
       saveApiKey(defaultKey);
       setIsSuccess(true);
     }
