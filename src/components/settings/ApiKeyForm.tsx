@@ -24,7 +24,7 @@ export function ApiKeyForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      apiKey: "",
+      apiKey: "sk_e78f5b4bb2a54a10092f82ae2445a3a3eba8d4c9db08df5d",
     },
   });
 
@@ -33,6 +33,11 @@ export function ApiKeyForm() {
     const savedKey = localStorage.getItem("elevenlabs_api_key");
     if (savedKey) {
       form.setValue("apiKey", savedKey);
+      setIsSuccess(true);
+    } else {
+      // If no key is saved in localStorage, use the default key and save it
+      const defaultKey = "sk_e78f5b4bb2a54a10092f82ae2445a3a3eba8d4c9db08df5d";
+      saveApiKey(defaultKey);
       setIsSuccess(true);
     }
   }, [form]);
@@ -78,7 +83,7 @@ export function ApiKeyForm() {
                   <FormControl>
                     <Input
                       placeholder="Enter your ElevenLabs API key"
-                      type="password"
+                      type="text"
                       {...field}
                     />
                   </FormControl>

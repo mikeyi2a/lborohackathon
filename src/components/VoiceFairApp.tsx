@@ -8,9 +8,6 @@ import { BlindTestToggle } from "./blindtest/BlindTestToggle";
 import { BlindTest } from "./blindtest/BlindTest";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformVoice } from "@/lib/elevenlabs-api";
-import { Button } from "@/components/ui/button";
-import { SettingsIcon } from "lucide-react";
-import { SettingsPage } from "./settings/SettingsPage";
 
 export type Accent = {
   id: string;
@@ -32,7 +29,6 @@ export default function VoiceFairApp() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isBlindTestMode, setIsBlindTestMode] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
-  const [showSettings, setShowSettings] = useState(false);
 
   const handleAudioUpload = (audio: AudioFile) => {
     // Reset any previous state
@@ -95,27 +91,10 @@ export default function VoiceFairApp() {
     }
   };
 
-  const goToSettings = () => {
-    setShowSettings(true);
-  };
-
-  if (showSettings) {
-    return <SettingsPage onBack={() => setShowSettings(false)} />;
-  }
-
   return (
-    <div className="container py-8 md:py-12">
-      <div className="flex justify-between items-center mb-6">
+    <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+      <div className="mb-6">
         <AppIntro />
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={goToSettings}
-          className="ml-4"
-        >
-          <SettingsIcon className="h-4 w-4 mr-2" />
-          Settings
-        </Button>
       </div>
       
       <div className="mt-8 space-y-8">
@@ -140,7 +119,6 @@ export default function VoiceFairApp() {
                 
                 <TransformControls 
                   onTransform={handleTransform}
-                  onSettingsClick={goToSettings}
                   isProcessing={isProcessing}
                   disabled={!originalAudio || !selectedAccent || isProcessing}
                   error={processingError}
