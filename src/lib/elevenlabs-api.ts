@@ -19,6 +19,11 @@ export async function transformVoice(
 ): Promise<AudioFile | null> {
   const apiKey = getApiKey();
   
+  // Add detailed logging for the accent parameter
+  console.log('Transform request with accent:', accent);
+  console.log('Accent ID:', accent.id);
+  console.log('Accent name:', accent.name);
+  
   if (!apiKey) {
     throw new Error('ElevenLabs API key not found. Please add your API key in the settings.');
   }
@@ -57,7 +62,9 @@ export async function transformVoice(
     const voiceId = getVoiceIdForAccent(accent);
     
     // Log the complete API URL for debugging
-    const apiUrl = `${API_BASE_URL}/speech-to-speech/${voiceId}`;
+    // Add a cache-busting timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    const apiUrl = `${API_BASE_URL}/speech-to-speech/${voiceId}?cache_bust=${timestamp}`;
     console.log('Making request to ElevenLabs API URL:', apiUrl);
     
     // Make the API request to Eleven Labs - correct endpoint from documentation
@@ -115,8 +122,7 @@ export async function transformVoice(
  * In a real implementation, you would have a mapping of accents to voice IDs
  */
 function getVoiceIdForAccent(accent: Accent): string {
-  // This is a simplified implementation
-  // In a real app, you would have a proper mapping of accents to voice IDs
+  // Ensure we're using the latest voice mappings
   // These are real Eleven Labs voice IDs for premium voices
   const voiceMap: Record<string, string> = {
     'british': '21m00Tcm4TlvDq8ikWAM', // Rachel

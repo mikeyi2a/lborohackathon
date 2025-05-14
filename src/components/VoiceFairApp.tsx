@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AudioUpload } from "./audio/AudioUpload";
 import { AccentSelector } from "./accent/AccentSelector";
 import { AudioComparison } from "./audio/AudioComparison";
@@ -44,6 +44,10 @@ export default function VoiceFairApp() {
     setProcessingError(null);
 
     try {
+      // Log the selected accent to ensure correct values are being used
+      console.log('Starting transformation with accent:', selectedAccent);
+      console.log('Accent ID for API call:', selectedAccent.id);
+      
       // Check if we have audio data first
       if (!originalAudio.url) {
         throw new Error("Audio file is invalid or not properly loaded.");
