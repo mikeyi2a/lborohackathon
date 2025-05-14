@@ -3,8 +3,8 @@ import { InfoIcon } from "lucide-react";
 
 export function AppIntro() {
   return (
-    <div className="space-y-4">
-      <div className="text-center">
+    <div className="space-y-4 max-w-3xl mx-auto text-center">
+      <div>
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
           VoiceFair
         </h1>
