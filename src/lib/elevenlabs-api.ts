@@ -126,7 +126,7 @@ function getVoiceIdForAccent(accent: Accent): string {
   // These are real Eleven Labs voice IDs for premium voices
   const voiceMap: Record<string, string> = {
     'british': '21m00Tcm4TlvDq8ikWAM', // Rachel
-    'american': 'ecp3DWciuUyW7BYM7II1', // Antoni
+    'american': 'ErXwobaYiN019PkySvjV', // Antoni
     'australian': 'IKne3meq5aSn9XLyUdCD', // Josh 
     'indian': 'ecp3DWciuUyW7BYM7II1', // Anika
     'french': 'jsCqWAovK2LkecY7zXl4', // Nicole
