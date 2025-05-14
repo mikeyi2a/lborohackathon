@@ -1,30 +1,18 @@
-import { MicIcon, Settings } from "lucide-react";
+import { MicIcon } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle";
-import { Button } from "../ui/button";
 
-interface HeaderProps {
-  onSettingsClick?: () => void;
-}
-
-export function Header({ onSettingsClick }: HeaderProps) {
+export function Header() {
   return (
-    <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <MicIcon className="h-6 w-6 text-primary" />
-        <span className="ml-2 text-xl font-bold">VoiceFair</span>
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onSettingsClick}
-            className="mr-2"
-          >
-            <Settings className="h-4 w-4" />
-            <span className="sr-only">Settings</span>
-          </Button>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <MicIcon className="h-6 w-6 text-primary" />
+          <span className="text-xl font-bold">VoiceFair</span>
+        </div>
+        <div className="flex items-center gap-4">
           <ThemeToggle />
         </div>
       </div>
-    </div>
+    </header>
   );
 }
