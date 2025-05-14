@@ -38,6 +38,23 @@ export function AudioComparison({
     document.body.removeChild(link);
   };
 
+  // Helper function to get voice number from accent id
+  const getVoiceNumber = (accentId: string): string => {
+    const voiceMap: Record<string, string> = {
+      'british': 'Voice 1',
+      'american': 'Voice 2',
+      'indian': 'Voice 3',
+      'australian': 'Voice 4',
+      'french': 'Voice 5',
+      'spanish': 'Voice 6',
+      'german': 'Voice 7',
+      'japanese': 'Voice 8',
+      'polish': 'Voice 9',
+      'irish': 'Voice 10'
+    };
+    return voiceMap[accentId] || 'Unknown Voice';
+  };
+
   return (
     <Card className="animate-in fade-in-0 slide-in-from-bottom-4 duration-300">
       <CardHeader>
@@ -75,18 +92,12 @@ export function AudioComparison({
               <h3 className="font-semibold text-lg">Transformed Audio</h3>
               <div className="flex flex-col gap-1">
                 <p className="text-sm text-muted-foreground">
-                  {accent ? `With ${accent.name} accent` : 'Transformed version'}
+                  {accent ? `With ${getVoiceNumber(accent.id)}` : 'Transformed version'}
                 </p>
                 {transformedAudio.voiceId && (
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-xs">
                       Voice ID: {transformedAudio.voiceId}
-                    </Badge>
-                    <Badge variant="secondary" className="text-xs">
-                      {accent?.id === 'american' ? 'Antoni' : 
-                       accent?.id === 'indian' ? 'Anika' : 
-                       accent?.id === 'british' ? 'Rachel' : 
-                       accent?.id === 'australian' ? 'Josh' : ''}
                     </Badge>
                   </div>
                 )}

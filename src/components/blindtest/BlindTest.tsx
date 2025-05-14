@@ -37,6 +37,23 @@ export function BlindTest({
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
+  // Helper function to get voice number from accent id
+  const getVoiceNumber = (accentId: string): string => {
+    const voiceMap: Record<string, string> = {
+      'british': 'Voice 1',
+      'american': 'Voice 2',
+      'indian': 'Voice 3',
+      'australian': 'Voice 4',
+      'french': 'Voice 5',
+      'spanish': 'Voice 6',
+      'german': 'Voice 7',
+      'japanese': 'Voice 8',
+      'polish': 'Voice 9',
+      'irish': 'Voice 10'
+    };
+    return voiceMap[accentId] || 'Unknown Voice';
+  };
+
   // Prepare and randomize the test audios
   useEffect(() => {
     const audioA: TestAudio = {
@@ -88,7 +105,7 @@ export function BlindTest({
       <CardHeader>
         <CardTitle>Blind Test</CardTitle>
         <CardDescription>
-          Can you identify which audio has been transformed to the {accent.name} accent?
+          Can you identify which audio has been transformed to {getVoiceNumber(accent.id)}?
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -104,7 +121,7 @@ export function BlindTest({
         {!hasSubmitted ? (
           <div className="space-y-4">
             <div className="border rounded-lg p-4">
-              <div className="font-medium mb-3">Which audio has the transformed accent?</div>
+              <div className="font-medium mb-3">Which audio has the transformed voice?</div>
               <RadioGroup 
                 value={selectedAudio || ''} 
                 onValueChange={setSelectedAudio}
@@ -147,7 +164,7 @@ export function BlindTest({
                   }
                 </p>
                 <p className="text-sm">
-                  {testAudios.find(a => a.isTransformed)?.label} was the transformed audio with the {accent.name} accent.
+                  {testAudios.find(a => a.isTransformed)?.label} was the transformed audio with {getVoiceNumber(accent.id)}.
                 </p>
               </div>
             </div>
