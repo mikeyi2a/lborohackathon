@@ -204,6 +204,72 @@ export default function VoiceFairApp() {
           </div>
         </BlurFade>
       )}
+
+      <Separator className="my-12" />
+
+      {/* Educational Section: How it Works & Why */}
+      <section className="grid gap-12 md:grid-cols-2 lg:gap-16 py-12">
+        <BlurFade delay={0.4} inView>
+          <div className="space-y-6">
+            <div className="inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary ring-1 ring-inset ring-primary/20">
+              Technology
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight">How it Works</h2>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              VoiceFair leverages state-of-the-art **Speech-to-Speech (STS)** AI. Unlike traditional voice cloning, our system preserves your original:
+            </p>
+            <ul className="space-y-4">
+              {[
+                { title: "Emotional Intelligence", desc: "Preserves the subtle nuances and feelings in your delivery." },
+                { title: "Rhythm & Cadence", desc: "Maintains your natural speaking pace and pauses." },
+                { title: "Vocal Performance", desc: "Transfers your unique energy into a new target accent." }
+              ].map((item, i) => (
+                <li key={i} className="flex gap-4">
+                  <div className="flex-none h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-bold">
+                    {i + 1}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold">{item.title}</h4>
+                    <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </BlurFade>
+
+        <BlurFade delay={0.5} inView>
+          <div className="space-y-6 p-8 rounded-3xl bg-secondary/50 border border-border/50">
+            <div className="inline-flex items-center rounded-full bg-amber-500/10 px-3 py-1 text-sm font-medium text-amber-600 ring-1 ring-inset ring-amber-500/20">
+              Our Mission
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight">Why VoiceFair?</h2>
+            <div className="space-y-4 text-muted-foreground leading-relaxed">
+              <p>
+                Accent bias exists. People are often unfairly judged based on their pronunciation rather than the value of their ideas.
+              </p>
+              <p className="font-medium text-foreground">
+                VoiceFair is an ethical tool designed to level the playing field.
+              </p>
+              <p>
+                By allowing individuals to transform their vocal delivery while maintaining their unique performance, we aim to focus conversation on **what** is being said, not **how** it sounds.
+              </p>
+            </div>
+            <div className="pt-4 flex gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-primary-foreground shadow-lg shadow-primary/20">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+              <div>
+                <h4 className="font-semibold">Ethical AI Framework</h4>
+                <p className="text-xs text-muted-foreground">Built to empower creators and professionals through inclusive technology.</p>
+              </div>
+            </div>
+          </div>
+        </BlurFade>
+      </section>
     </div>
   );
 }
+
+// Correct icons import at bottom if I'm using them
+import { CheckCircle2 } from "lucide-react";
