@@ -24,20 +24,15 @@ export function ApiKeyForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      apiKey: "sk_48ce94b1344dbc38f6136e68a468661ea49328468cbbc88b",
+      apiKey: "",
     },
   });
 
-  // Load API key from localStorage on component mount
+  // Load API key from localStorage on component mount (only if user previously saved one)
   useEffect(() => {
     const savedKey = localStorage.getItem("elevenlabs_api_key");
     if (savedKey) {
       form.setValue("apiKey", savedKey);
-      setIsSuccess(true);
-    } else {
-      // If no key is saved in localStorage, use the default key and save it
-      const defaultKey = "sk_48ce94b1344dbc38f6136e68a468661ea49328468cbbc88b";
-      saveApiKey(defaultKey);
       setIsSuccess(true);
     }
   }, [form]);
@@ -45,10 +40,10 @@ export function ApiKeyForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const isValid = await checkApiKey(values.apiKey);
-      
+
       if (isValid) {
         saveApiKey(values.apiKey);
         setIsSuccess(true);
@@ -102,14 +97,14 @@ export function ApiKeyForm() {
                 </FormItem>
               )}
             />
-            
+
             {error && (
               <Alert variant="destructive" className="mt-4">
                 <AlertCircleIcon className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            
+
             {isSuccess && !error && (
               <Alert className="mt-4 bg-green-50 text-green-900 border-green-200">
                 <CheckIcon className="h-4 w-4 text-green-700" />
@@ -118,7 +113,7 @@ export function ApiKeyForm() {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
                 <>
