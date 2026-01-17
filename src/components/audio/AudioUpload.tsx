@@ -235,6 +235,8 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
                     className="hidden"
                     accept="audio/mp3, audio/wav"
                     onChange={handleFileInputChange}
+                    aria-label="Upload audio file (MP3 or WAV)"
+                    id="audio-file-input"
                   />
 
                   <div className="relative flex items-center py-2 sm:py-0">
@@ -267,7 +269,14 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
                   <p className="text-xs text-red-500 font-medium animate-pulse">Recording...</p>
                 </div>
 
-                <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="w-full bg-muted rounded-full h-1.5 overflow-hidden"
+                  role="progressbar"
+                  aria-valuenow={recordingTime}
+                  aria-valuemin={0}
+                  aria-valuemax={30}
+                  aria-label="Recording progress"
+                >
                   <motion.div
                     className="bg-red-500 h-full rounded-full"
                     initial={{ width: "0%" }}
@@ -304,7 +313,13 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
                   {(audioFile.size / 1024 / 1024).toFixed(2)} MB • {audioFile.type.split('/')[1].toUpperCase()}
                 </p>
               </div>
-              <Button variant="ghost" size="icon" onClick={clearAudio} className="text-muted-foreground hover:text-destructive">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={clearAudio}
+                className="text-muted-foreground hover:text-destructive"
+                aria-label="Remove uploaded audio file"
+              >
                 <X className="h-5 w-5" />
               </Button>
             </div>

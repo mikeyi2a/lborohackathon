@@ -109,16 +109,26 @@ export function AccentSelector({
           return (
             <motion.div
               key={accent.id}
+              role="button"
+              tabIndex={isItemDisabled ? -1 : 0}
+              aria-disabled={isItemDisabled}
+              aria-label={`Select ${accent.name} voice${isItemDisabled ? ' (requires Pro upgrade)' : ''}`}
               whileHover={{ scale: isItemDisabled ? 1 : 1.03, y: isItemDisabled ? 0 : -2 }}
               whileTap={{ scale: isItemDisabled ? 1 : 0.98 }}
               className={cn(
-                "relative group cursor-pointer rounded-2xl overflow-hidden bg-card border shadow-sm transition-all duration-300",
+                "relative group cursor-pointer rounded-2xl overflow-hidden bg-card border shadow-sm transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                 isSelected
                   ? "ring-2 ring-primary ring-offset-2 border-primary/20 shadow-md"
                   : "hover:shadow-lg border-border/50",
                 isItemDisabled && "opacity-60 cursor-not-allowed grayscale-[0.8]"
               )}
               onClick={() => !isItemDisabled && onAccentSelected(accent)}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && !isItemDisabled) {
+                  e.preventDefault();
+                  onAccentSelected(accent);
+                }
+              }}
             >
               {/* Glossy Gradient Header (Partial) */}
               <div className={cn(

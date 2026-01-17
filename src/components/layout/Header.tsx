@@ -11,7 +11,7 @@ export function Header({ onSettingsClick }: HeaderProps) {
     <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 flex h-14 items-center justify-between">
         <div className="flex items-center gap-3">
-          <img src="/logo.png" alt="VoiceFair Logo" className="h-8 w-auto" />
+          <img src="/logo.png" alt="VoiceFair Logo" className="h-8 w-auto" width="120" height="32" />
         </div>
         <div className="flex items-center gap-2">
           <ThemeToggle />
