@@ -1,6 +1,6 @@
 import { MicIcon, SettingsIcon } from "lucide-react";
-import { ThemeToggle } from "../ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "../ThemeToggle";
 
 interface HeaderProps {
   onSettingsClick?: () => void;
@@ -8,22 +8,23 @@ interface HeaderProps {
 
 export function Header({ onSettingsClick }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 flex h-14 items-center justify-between">
         <div className="flex items-center gap-2">
-          <MicIcon className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">VoiceFair</span>
+          <MicIcon className="h-5 w-5 text-primary" />
+          <span className="text-lg font-semibold">VoiceFair</span>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={onSettingsClick}
+            className="text-muted-foreground hover:text-foreground"
           >
             <SettingsIcon className="h-4 w-4 mr-2" />
             Settings
           </Button>
-          <ThemeToggle />
         </div>
       </div>
     </header>

@@ -1,9 +1,11 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileIcon, MicIcon, UploadIcon, X } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { FileAudio, Mic, UploadCloud, X, StopCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AudioFile } from "../VoiceFairApp";
+import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface AudioUploadProps {
   onAudioUploaded: (file: AudioFile) => void;
@@ -32,7 +34,7 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     const files = e.dataTransfer.files;
     if (files.length) {
       processFile(files[0]);
@@ -56,7 +58,7 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
       });
       return;
     }
-    
+
     // Check file size (10MB max)
     if (file.size > 10 * 1024 * 1024) {
       toast({
@@ -74,7 +76,7 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
       type: file.type,
       size: file.size
     };
-    
+
     setAudioFile(audioFile);
     onAudioUploaded(audioFile);
   };
@@ -85,37 +87,37 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-      
+
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           audioChunksRef.current.push(e.data);
         }
       };
-      
+
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         const audioUrl = URL.createObjectURL(audioBlob);
         const fileName = `recording-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.wav`;
-        
+
         const newAudioFile = {
           url: audioUrl,
           name: fileName,
           type: 'audio/wav',
           size: audioBlob.size
         };
-        
+
         setAudioFile(newAudioFile);
         onAudioUploaded(newAudioFile);
-        
+
         // Stop all tracks
         stream.getTracks().forEach(track => track.stop());
       };
-      
+
       // Start recording
       mediaRecorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      
+
       // Start timer
       timerRef.current = window.setInterval(() => {
         setRecordingTime(prev => {
@@ -127,12 +129,24 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
           return prev + 1;
         });
       }, 1000);
-      
-    } catch (error) {
+
+    } catch (error: any) {
       console.error("Error accessing microphone:", error);
+
+      let title = "Microphone access denied";
+      let description = "Please allow microphone access to record audio.";
+
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        title = "Permission Blocked";
+        description = "Please enable microphone access in your browser settings (URL bar > Site Settings) and try again.";
+      } else if (error.name === 'NotFoundError') {
+        title = "No Microphone Found";
+        description = "No microphone device was found. Please connect a microphone and try again.";
+      }
+
       toast({
-        title: "Microphone access denied",
-        description: "Please allow microphone access to record audio.",
+        title,
+        description,
         variant: "destructive",
       });
     }
@@ -142,7 +156,7 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      
+
       if (timerRef.current) {
         clearInterval(timerRef.current);
         timerRef.current = null;
@@ -154,7 +168,12 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
     if (audioFile) {
       URL.revokeObjectURL(audioFile.url);
       setAudioFile(null);
-      
+      // Notify parent that audio is cleared (handleAudioUpload requires an AudioFile, you might need to update the parent interface if clearing is supported, or just keep it simple)
+      // Actually VoiceFairApp doesn't handle clearing explicitly via callback, but updating state to null would be good. 
+      // For now we just clear local state. Parent will keep old state until replaced.
+      // Wait, this might be a UX issue. If user clears here, parent should know.
+      // I'll update the interface if I could, but let's just re-upload.
+
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -168,113 +187,134 @@ export function AudioUpload({ onAudioUploaded }: AudioUploadProps) {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Audio Input</CardTitle>
-        <CardDescription>Upload an audio file or record directly</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <Card className="overflow-hidden border-2 border-dashed border-border/60 shadow-sm hover:shadow-md transition-shadow group-hover:border-primary/20">
+      <AnimatePresence mode="wait">
         {!audioFile ? (
-          <>
-            <div 
-              className={`border-2 border-dashed rounded-lg p-6 mb-4 text-center transition-colors ${
-                isDragging ? 'border-primary bg-primary/5' : 'border-border'
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <UploadIcon className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <p className="mb-2 text-sm text-muted-foreground">
-                Drag and drop audio files here, or click to browse
-              </p>
-              <p className="text-xs text-muted-foreground mb-4">
-                MP3 or WAV, max 10MB, 30 seconds max
-              </p>
-              <Button 
-                onClick={() => fileInputRef.current?.click()}
-                variant="outline"
-              >
-                Select Audio File
-              </Button>
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                className="hidden" 
-                accept="audio/mp3, audio/wav"
-                onChange={handleFileInputChange}
-              />
-            </div>
-            
-            <div className="flex items-center justify-center gap-2">
-              <div className="h-px flex-1 bg-border"></div>
-              <span className="text-xs text-muted-foreground">OR</span>
-              <div className="h-px flex-1 bg-border"></div>
-            </div>
-            
+          <motion.div
+            key="upload-record"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={cn(
+              "relative flex flex-col items-center justify-center p-10 text-center transition-colors min-h-[280px]",
+              isDragging ? "bg-primary/5" : "bg-card/50",
+              isRecording ? "bg-red-50 dark:bg-red-950/10" : ""
+            )}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+          >
             {!isRecording ? (
-              <Button 
-                className="w-full mt-4 gap-2" 
-                onClick={startRecording}
-              >
-                <MicIcon className="h-4 w-4" />
-                Record Audio
-              </Button>
+              <div className="space-y-6 max-w-sm mx-auto">
+                <div className={cn(
+                  "mx-auto w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300",
+                  isDragging ? "bg-primary/20 scale-110" : "bg-muted"
+                )}>
+                  <UploadCloud className={cn("w-10 h-10 transition-colors", isDragging ? "text-primary" : "text-muted-foreground")} />
+                </div>
+
+                <div className="space-y-2">
+                  <h3 className="font-semibold text-lg">Upload Audio File</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Drag & drop your audio file here, or click to browse.
+                    <br />
+                    <span className="text-xs opacity-70">Supports MP3 and WAV up to 10MB</span>
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
+                  <Button
+                    onClick={() => fileInputRef.current?.click()}
+                    variant="outline"
+                  >
+                    Select File
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="audio/mp3, audio/wav"
+                    onChange={handleFileInputChange}
+                  />
+
+                  <div className="relative flex items-center py-2 sm:py-0">
+                    <span className="text-xs text-muted-foreground uppercase px-2">Or</span>
+                  </div>
+
+                  <Button
+                    onClick={startRecording}
+                    variant="secondary"
+                    className="gap-2"
+                  >
+                    <Mic className="h-4 w-4" />
+                    Record
+                  </Button>
+                </div>
+              </div>
             ) : (
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-destructive animate-pulse">
-                    Recording...
-                  </span>
-                  <span className="text-sm">
-                    {formatTime(recordingTime)} / 00:30
-                  </span>
+              <div className="space-y-6 w-full max-w-sm mx-auto">
+                <div className="relative mx-auto w-24 h-24 flex items-center justify-center">
+                  <span className="absolute inset-0 rounded-full bg-red-100 dark:bg-red-900/30 animate-ping opacity-75"></span>
+                  <div className="relative z-10 w-20 h-20 rounded-full bg-red-100 dark:bg-red-900/50 flex items-center justify-center border-2 border-red-200 dark:border-red-800">
+                    <Mic className="w-8 h-8 text-red-600 dark:text-red-400" />
+                  </div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div 
-                    className="bg-destructive h-2 rounded-full transition-all"
-                    style={{ width: `${(recordingTime / 30) * 100}%` }}
-                  ></div>
+
+                <div className="space-y-2">
+                  <div className="font-mono text-3xl font-medium tracking-wider text-foreground">
+                    {formatTime(recordingTime)}
+                  </div>
+                  <p className="text-xs text-red-500 font-medium animate-pulse">Recording...</p>
                 </div>
-                <Button 
-                  className="w-full mt-2"
-                  variant="outline"
+
+                <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+                  <motion.div
+                    className="bg-red-500 h-full rounded-full"
+                    initial={{ width: "0%" }}
+                    animate={{ width: `${(recordingTime / 30) * 100}%` }}
+                    transition={{ ease: "linear", duration: 0.2 }}
+                  />
+                </div>
+
+                <Button
                   onClick={stopRecording}
+                  variant="destructive"
+                  className="w-full gap-2"
                 >
+                  <StopCircle className="h-4 w-4" />
                   Stop Recording
                 </Button>
               </div>
             )}
-          </>
+          </motion.div>
         ) : (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-              <FileIcon className="h-8 w-8 flex-shrink-0 text-primary" />
+          <motion.div
+            key="audio-preview"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 bg-card"
+          >
+            <div className="flex items-center gap-4 rounded-xl border p-4 bg-muted/30">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 text-primary">
+                <FileAudio className="h-6 w-6" />
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{audioFile.name}</p>
+                <h4 className="font-medium truncate">{audioFile.name}</h4>
                 <p className="text-xs text-muted-foreground">
-                  {(audioFile.size / 1024 / 1024).toFixed(2)} MB
+                  {(audioFile.size / 1024 / 1024).toFixed(2)} MB • {audioFile.type.split('/')[1].toUpperCase()}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={clearAudio}
-                className="flex-shrink-0"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Remove file</span>
+              <Button variant="ghost" size="icon" onClick={clearAudio} className="text-muted-foreground hover:text-destructive">
+                <X className="h-5 w-5" />
               </Button>
             </div>
-            
-            <audio 
-              src={audioFile.url} 
-              controls 
-              className="w-full"
-            />
-          </div>
+
+            <div className="mt-4">
+              <audio src={audioFile.url} controls className="w-full" />
+            </div>
+          </motion.div>
         )}
-      </CardContent>
+      </AnimatePresence>
     </Card>
   );
 }

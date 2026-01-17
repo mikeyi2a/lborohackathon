@@ -3,12 +3,13 @@ import { AudioUpload } from "./audio/AudioUpload";
 import { AccentSelector } from "./accent/AccentSelector";
 import { AudioComparison } from "./audio/AudioComparison";
 import { TransformControls } from "./controls/TransformControls";
-import { AppIntro } from "./AppIntro";
-import { BlindTestToggle } from "./blindtest/BlindTestToggle";
 import { BlindTest } from "./blindtest/BlindTest";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { transformVoice, getVoiceIdForAccent } from "@/lib/elevenlabs-api";
 import { checkNeedsReload, markForReload } from "@/lib/force-reload";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Eye, EyeOff } from "lucide-react";
 
 export type Accent = {
   id: string;
@@ -29,19 +30,19 @@ export default function VoiceFairApp() {
   const [transformedAudio, setTransformedAudio] = useState<AudioFile | null>(null);
   const [selectedAccent, setSelectedAccent] = useState<Accent | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isBlindTestMode, setIsBlindTestMode] = useState(false);
+  const [showBlindTest, setShowBlindTest] = useState(false);
   const [processingError, setProcessingError] = useState<string | null>(null);
 
   // Check if we need to force reload on component mount
   useEffect(() => {
     checkNeedsReload();
-    
+
     // Clear any cached data in localStorage
     if (typeof window !== 'undefined') {
       // Add a version number to track when we need to clear cache
-      const currentVersion = '1.0.2'; // Bumped to force cache refresh
+      const currentVersion = '1.0.3'; // Bumped for new layout
       const storedVersion = localStorage.getItem('app_version');
-      
+
       if (storedVersion !== currentVersion) {
         console.log(`Version change detected: ${storedVersion} -> ${currentVersion}`);
         console.log('Clearing cache and updating version...');
@@ -58,6 +59,7 @@ export default function VoiceFairApp() {
     setOriginalAudio(audio);
     setTransformedAudio(null);
     setProcessingError(null);
+    setShowBlindTest(false);
   };
 
   const handleTransform = async () => {
@@ -67,56 +69,51 @@ export default function VoiceFairApp() {
     setProcessingError(null);
 
     try {
-      // Log the selected accent to ensure correct values are being used
-      console.log('Starting transformation with accent:', selectedAccent);
-      console.log('Accent ID for API call:', selectedAccent.id);
-      
-      // Check if we have audio data first
       if (!originalAudio.url) {
         throw new Error("Audio file is invalid or not properly loaded.");
       }
 
-      // Check file size
       const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
       if (originalAudio.size > MAX_FILE_SIZE) {
         throw new Error("Audio file is too large. Maximum size is 10MB.");
       }
 
-      // Get the voice ID before transformation for display
       const voiceId = getVoiceIdForAccent(selectedAccent);
-
-      // Use the Eleven Labs API to transform the voice
       const result = await transformVoice(originalAudio, selectedAccent);
-      
+
       if (!result) {
         throw new Error("Voice transformation failed. Please try again.");
       }
-      
-      // Add the voice ID to the result for display
+
       setTransformedAudio({
         ...result,
-        voiceId: voiceId, // Store the voice ID for display
+        voiceId: voiceId,
       });
+
+      // Auto-scroll to results
+      setTimeout(() => {
+        const resultsElement = document.getElementById('results-section');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+
     } catch (error) {
       console.error("Transformation error:", error);
-      
-      // Handle specific API key errors
+
       if (error instanceof Error && error.message.includes('API key not found')) {
         setProcessingError('ElevenLabs API key not found. Please add your API key in the settings.');
-      } 
-      // Handle rate limiting or subscription issues
+      }
       else if (error instanceof Error && error.message.includes('402')) {
         setProcessingError('API subscription limit reached. Please check your ElevenLabs account.');
       }
-      // Handle authentication errors
       else if (error instanceof Error && error.message.includes('401')) {
         setProcessingError('Invalid API key. Please check your ElevenLabs API key in settings.');
       }
-      // Handle other errors
       else {
         setProcessingError(
-          error instanceof Error 
-            ? error.message 
+          error instanceof Error
+            ? error.message
             : "Failed to transform audio. Please try again."
         );
       }
@@ -126,67 +123,87 @@ export default function VoiceFairApp() {
   };
 
   return (
-    <div className="container max-w-screen-xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-      <div className="mb-6">
-        <AppIntro />
-      </div>
-      
-      <div className="mt-8 space-y-8">
-        <Tabs defaultValue="transform" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="transform">Transform</TabsTrigger>
-            <TabsTrigger value="blind-test" disabled={!transformedAudio}>
-              Blind Test
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="transform" className="mt-6 space-y-8">
-            <div className="grid gap-8 md:grid-cols-2">
-              <AudioUpload onAudioUploaded={handleAudioUpload} />
-              
-              <div className="space-y-6">
-                <AccentSelector 
-                  onAccentSelected={setSelectedAccent} 
-                  selectedAccent={selectedAccent}
-                  disabled={!originalAudio || isProcessing}
-                />
-                
-                <TransformControls 
-                  onTransform={handleTransform}
-                  isProcessing={isProcessing}
-                  disabled={!originalAudio || !selectedAccent || isProcessing}
-                  error={processingError}
-                />
+    <div className="container max-w-screen-lg mx-auto px-4 sm:px-6 py-6 space-y-12 pb-24">
+      {/* Step 1: Upload */}
+      <BlurFade delay={0.1} inView>
+        <section className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm ring-4 ring-primary/5">1</div>
+            <h2 className="text-xl font-semibold tracking-tight">Upload Audio</h2>
+          </div>
+          <AudioUpload onAudioUploaded={handleAudioUpload} />
+        </section>
+      </BlurFade>
+
+      {/* Step 2: Voice Selection */}
+      <BlurFade delay={0.2} inView>
+        <section className="space-y-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-sm ring-4 ring-primary/5">2</div>
+            <h2 className="text-xl font-semibold tracking-tight">Select Target Voice</h2>
+          </div>
+          <AccentSelector
+            onAccentSelected={setSelectedAccent}
+            selectedAccent={selectedAccent}
+            disabled={isProcessing}
+          />
+        </section>
+      </BlurFade>
+
+      {/* Step 3: Transform Action */}
+      <BlurFade delay={0.3} inView>
+        <div className="sticky bottom-6 z-10 pt-4 pb-2">
+          <div className="absolute inset-0 bg-background/80 backdrop-blur-md -z-10 -mx-4 px-4 sm:-mx-6 sm:px-6 rounded-t-xl border-t border-border/50 shadow-[0_-8px_20px_-12px_rgba(0,0,0,0.1)] opacity-0 data-[visible=true]:opacity-100 transition-opacity" data-visible={!!(originalAudio && selectedAccent)}></div>
+          <TransformControls
+            onTransform={handleTransform}
+            isProcessing={isProcessing}
+            disabled={!originalAudio || !selectedAccent || isProcessing}
+            error={processingError}
+          />
+        </div>
+      </BlurFade>
+
+      {/* Step 4: Results */}
+      {transformedAudio && (
+        <BlurFade delay={0.1} inView>
+          <div id="results-section" className="pt-8 scroll-mt-24">
+            <Separator className="mb-12 opacity-50" />
+
+            <section className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-success/10 text-success font-bold text-sm ring-4 ring-success/5">✓</div>
+                  <h2 className="text-xl font-semibold tracking-tight">Transformation Complete</h2>
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowBlindTest(!showBlindTest)}
+                  className="gap-2"
+                >
+                  {showBlindTest ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showBlindTest ? "Hide Blind Test" : "Start Blind Test"}
+                </Button>
               </div>
-            </div>
-            
-            {transformedAudio && (
-              <>
-                <AudioComparison 
-                  originalAudio={originalAudio} 
-                  transformedAudio={transformedAudio} 
+
+              {showBlindTest ? (
+                <BlindTest
+                  originalAudio={originalAudio!}
+                  transformedAudio={transformedAudio}
+                  accent={selectedAccent!}
+                />
+              ) : (
+                <AudioComparison
+                  originalAudio={originalAudio}
+                  transformedAudio={transformedAudio}
                   accent={selectedAccent}
                 />
-                
-                <BlindTestToggle 
-                  enabled={isBlindTestMode}
-                  onToggle={() => setIsBlindTestMode(!isBlindTestMode)}
-                />
-              </>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="blind-test">
-            {transformedAudio && originalAudio && selectedAccent && (
-              <BlindTest 
-                originalAudio={originalAudio} 
-                transformedAudio={transformedAudio} 
-                accent={selectedAccent}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+              )}
+            </section>
+          </div>
+        </BlurFade>
+      )}
     </div>
   );
 }

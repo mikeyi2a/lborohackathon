@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
-        heading: ['Satoshi', 'sans-serif'],
+        sans: ['"Google Sans Flex"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        heading: ['"Google Sans Flex"', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -64,11 +64,22 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
+        sidebar: {
+          DEFAULT: 'hsl(var(--sidebar-background))',
+          foreground: 'hsl(var(--sidebar-foreground))',
+          accent: 'hsl(var(--sidebar-accent))',
+        },
+        chart: {
+          accent: 'hsl(var(--chart-accent))',
+        },
       },
       borderRadius: {
-        lg: '0',
-        md: '0',
-        sm: '0',
+        lg: "1rem",
+        md: "0.75rem",
+        sm: "0.5rem",
+        xl: "1.25rem",
+        "2xl": "1.5rem",
+        full: "9999px",
       },
       keyframes: {
         'accordion-down': {
