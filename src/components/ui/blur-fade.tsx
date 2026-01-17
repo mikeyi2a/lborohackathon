@@ -2,15 +2,13 @@ import { useRef } from "react"
 import {
   AnimatePresence,
   motion,
-  MotionProps,
   useInView,
-  UseInViewOptions,
   Variants,
-} from "motion/react"
+} from "framer-motion"
 
-type MarginType = UseInViewOptions["margin"]
+type MarginType = string
 
-interface BlurFadeProps extends MotionProps {
+interface BlurFadeProps {
   children: React.ReactNode
   className?: string
   variant?: {
@@ -40,7 +38,7 @@ export function BlurFade({
   ...props
 }: BlurFadeProps) {
   const ref = useRef(null)
-  const inViewResult = useInView(ref, { once: true, margin: inViewMargin })
+  const inViewResult = useInView(ref, { once: true, margin: inViewMargin as `${number}px` })
   const isInView = !inView || inViewResult
   const defaultVariants: Variants = {
     hidden: {
